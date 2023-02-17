@@ -121,7 +121,7 @@ describe('App e2e test', () => {
     describe('Create product', () => {
       const dto: CreateProductDto = {
         name: 'test product',
-        price: '10.5',
+        price: '100.5',
       };
       it('should create product', () => {
         return pactum
