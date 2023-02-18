@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Decimal } from '@prisma/client/runtime';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, EditProductDto } from './dto';
 
@@ -11,12 +11,15 @@ export class ProductService {
   }
 
   getProduct(id: number) {
-    return this.prisma.product.findUnique({ where: { id } });
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: { categories: true },
+    });
   }
 
   async createProduct(dto: CreateProductDto) {
     const product = await this.prisma.product.create({
-      data: { ...dto, price: new Decimal(dto.price) },
+      data: { ...dto, price: new Prisma.Decimal(dto.price) },
     });
     return product;
   }

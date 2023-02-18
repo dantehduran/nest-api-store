@@ -31,17 +31,16 @@ model Product {
   name        String
   description String?
   price       Decimal?
-  stock       Int      @default(0)
-  // categoryId  Int
-  // category    Category @relation(fields: [categoryId], references: [id])
+  stock       Int        @default(0)
+  categories  Category[]
 
   @@map("products")
 }
 
 model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  // products Product[]
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
 
   @@map("categories")
 }
