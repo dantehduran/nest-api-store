@@ -1,4 +1,10 @@
-import { IsDecimal, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDecimal,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class EditProductDto {
   @IsString()
@@ -16,4 +22,8 @@ export class EditProductDto {
   @IsNumber()
   @IsOptional()
   stock?: number;
+
+  @IsOptional()
+  @IsArray()
+  categories?: number[];
 }

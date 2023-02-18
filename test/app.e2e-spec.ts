@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import * as pactum from 'pactum';
 import { AuthDto } from '../src/auth/dto';
 import { EditDto } from '../src/user/dto';
-import { CreateProductDto } from 'src/product/dto';
+import { CreateProductDto, EditProductDto } from 'src/product/dto';
 import { CreateCategoryDto } from 'src/category/dto';
 describe('App e2e test', () => {
   let app: INestApplication;
@@ -108,90 +108,6 @@ describe('App e2e test', () => {
       });
     });
   });
-  describe('Products', () => {
-    describe('Get empty products', () => {
-      it('should get empty products', () => {
-        return pactum
-          .spec()
-          .get('/products')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(200)
-          .expectBody([]);
-      });
-    });
-    describe('Create product', () => {
-      const dto: CreateProductDto = {
-        name: 'test product',
-        price: '100.5',
-      };
-      it('should create product', () => {
-        return pactum
-          .spec()
-          .post('/products')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .withBody(dto)
-          .expectStatus(201)
-          .expectBodyContains(dto.name)
-          .expectBodyContains(dto.price)
-          .stores('productId', 'id');
-      });
-    });
-    describe('Get products', () => {
-      it('should get products', () => {
-        return pactum
-          .spec()
-          .get('/products')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(200)
-          .expectJsonLength(1);
-      });
-    });
-    describe('Get product by id', () => {
-      it('should get product by id', () => {
-        return pactum
-          .spec()
-          .get('/products/{id}')
-          .withPathParams('id', '$S{productId}')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(200);
-      });
-    });
-    describe('Edit product by id', () => {
-      const dto: CreateProductDto = {
-        name: 'test product edited',
-        price: '10.5',
-      };
-      it('should edit product by id', () => {
-        return pactum
-          .spec()
-          .patch('/products/{id}')
-          .withPathParams('id', '$S{productId}')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .withBody(dto)
-          .expectStatus(200)
-          .expectBodyContains(dto.name)
-          .expectBodyContains(dto.price);
-      });
-    });
-    describe('Delete product by id', () => {
-      it('should delete product by id', () => {
-        return pactum
-          .spec()
-          .delete('/products/{id}')
-          .withPathParams('id', '$S{productId}')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(204);
-      });
-      it('should get empty products', () => {
-        return pactum
-          .spec()
-          .get('/products')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(200)
-          .expectJsonLength(0);
-      });
-    });
-  });
   describe('Categories', () => {
     describe('Get empty categories', () => {
       it('should get empty categories', () => {
@@ -251,6 +167,117 @@ describe('App e2e test', () => {
           .withBody(dto)
           .expectStatus(200)
           .expectBodyContains(dto.name);
+      });
+    });
+  });
+  describe('Products', () => {
+    describe('Get empty products', () => {
+      it('should get empty products', () => {
+        return pactum
+          .spec()
+          .get('/products')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectBody([]);
+      });
+    });
+    describe('Create product', () => {
+      const dto: CreateProductDto = {
+        name: 'test product',
+        price: '100.5',
+      };
+      it('should create product', () => {
+        return pactum
+          .spec()
+          .post('/products')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .withBody(dto)
+          .expectStatus(201)
+          .expectBodyContains(dto.name)
+          .expectBodyContains(dto.price)
+          .stores('productId', 'id')
+          .inspect();
+      });
+    });
+    describe('Get products', () => {
+      it('should get products', () => {
+        return pactum
+          .spec()
+          .get('/products')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectJsonLength(1);
+      });
+    });
+    describe('Get product by id', () => {
+      it('should get product by id', () => {
+        return pactum
+          .spec()
+          .get('/products/{id}')
+          .withPathParams('id', '$S{productId}')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200);
+      });
+    });
+    describe('Edit product by id', () => {
+      const dto: EditProductDto = {
+        name: 'test product edited',
+        price: '10.5',
+      };
+      it('should edit product by id', () => {
+        return pactum
+          .spec()
+          .patch('/products/{id}')
+          .withPathParams('id', '$S{productId}')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.name)
+          .expectBodyContains(dto.price);
+      });
+    });
+    describe('Connect a product to a category', () => {
+      const productDto: CreateProductDto = {
+        name: 'product with category',
+        price: '123.5',
+      };
+      it('should connect a product to a category', () => {
+        return pactum
+          .spec()
+          .post('/products')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .withBody({ ...productDto, categories: ['$S{categoryId}'] })
+          .expectStatus(201)
+          .stores('productId2', 'id');
+      });
+      it('should get product with category', () => {
+        return pactum
+          .spec()
+          .get('/products/{id}')
+          .withPathParams('id', '$S{productId2}')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200);
+      });
+    });
+  });
+  describe('Delete Product and Category', () => {
+    describe('Delete product by id', () => {
+      it('should delete product by id', () => {
+        return pactum
+          .spec()
+          .delete('/products/{id}')
+          .withPathParams('id', '$S{productId}')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(204);
+      });
+      it('should get empty products', () => {
+        return pactum
+          .spec()
+          .get('/products')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectJsonLength(1) //was created a product without category
+          .inspect();
       });
     });
     describe('Delete category by id', () => {

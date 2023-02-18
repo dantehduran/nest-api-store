@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDecimal,
   IsNotEmpty,
   IsNumber,
@@ -22,4 +23,8 @@ export class CreateProductDto {
   @IsNumber()
   @IsOptional()
   stock?: number;
+
+  @IsOptional()
+  @IsArray()
+  categories?: number[];
 }
