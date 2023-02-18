@@ -261,25 +261,6 @@ describe('App e2e test', () => {
     });
   });
   describe('Delete Product and Category', () => {
-    describe('Delete product by id', () => {
-      it('should delete product by id', () => {
-        return pactum
-          .spec()
-          .delete('/products/{id}')
-          .withPathParams('id', '$S{productId}')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(204);
-      });
-      it('should get empty products', () => {
-        return pactum
-          .spec()
-          .get('/products')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(200)
-          .expectJsonLength(1) //was created a product without category
-          .inspect();
-      });
-    });
     describe('Delete category by id', () => {
       it('should delete category by id', () => {
         return pactum
@@ -296,6 +277,25 @@ describe('App e2e test', () => {
           .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
           .expectStatus(200)
           .expectJsonLength(0);
+      });
+    });
+    describe('Delete product by id', () => {
+      it('should delete product by id', () => {
+        return pactum
+          .spec()
+          .delete('/products/{id}')
+          .withPathParams('id', '$S{productId}')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(204);
+      });
+
+      it('should get 1 product', () => {
+        return pactum
+          .spec()
+          .get('/products')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectJsonLength(1); //was created a product without category
       });
     });
   });
