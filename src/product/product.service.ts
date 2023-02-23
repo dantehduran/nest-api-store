@@ -6,7 +6,7 @@ import { CreateProductDto, EditProductDto } from './dto';
 export class ProductService {
   constructor(private prisma: PrismaService) {}
   getProducts() {
-    return this.prisma.product.findMany();
+    return this.prisma.product.findMany({ include: { categories: true } });
   }
 
   getProduct(id: number) {
@@ -34,7 +34,7 @@ export class ProductService {
     return product;
   }
 
-  editProduct(id: number, dto: EditProductDto) {
+  async editProduct(id: number, dto: EditProductDto) {
     const categories =
       dto.categories === undefined
         ? undefined
@@ -43,6 +43,12 @@ export class ProductService {
               id: category,
             })),
           };
+    await this.prisma.product.update({
+      where: { id },
+      data: {
+        categories: { set: [] },
+      },
+    });
     return this.prisma.product.update({
       where: { id },
       data: { ...dto, categories },
