@@ -18,11 +18,11 @@ export class AuthService {
       const hash = await argon.hash(dto.password);
       const user = await this.prisma.user.create({
         data: {
-          email: dto.email,
+          username: dto.username,
           hash,
         },
       });
-      return this.signToken(user.id, user.email);
+      return this.signToken(user.id, user.username);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -35,21 +35,21 @@ export class AuthService {
   async signin(dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: dto.email,
+        username: dto.username,
       },
     });
     if (!user) throw new ForbiddenException('Credentials incorrect');
     const pwMatches = await argon.verify(user.hash, dto.password);
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
-    return this.signToken(user.id, user.email);
+    return this.signToken(user.id, user.username);
   }
   async signToken(
     userId: number,
-    email: string,
+    username: string,
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
-      email,
+      username,
     };
     const token = await this.jwt.signAsync(payload, {
       expiresIn: '1d',

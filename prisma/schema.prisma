@@ -14,7 +14,7 @@ model User {
   id         Int       @id @default(autoincrement())
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  email      String    @unique()
+  username   String    @unique()
   hash       String
   firstName  String?
   lastName   String?
@@ -30,7 +30,7 @@ model Product {
 
   name        String
   description String?
-  price       Decimal?
+  price       Decimal?   @default("0")
   stock       Int        @default(0)
   categories  Category[]
 
