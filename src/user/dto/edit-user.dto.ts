@@ -3,11 +3,7 @@ import { IsOptional, IsString } from 'class-validator';
 export class EditDto {
   @IsOptional()
   @IsString()
-  firstName?: string;
-
-  @IsOptional()
-  @IsString()
-  lastName?: string;
+  fullName?: string;
 
   @IsOptional()
   @IsString()
