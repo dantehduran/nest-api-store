@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -10,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '@prisma/client';
-import { AdminGuard } from 'src/common/guards';
+import { AdminGuard } from '../common/guards';
 import { GetUser } from '../auth/decorator';
 import { EditDto } from './dto';
 import { CreateDto } from './dto/create-user.dto';
@@ -27,7 +29,7 @@ export class UserController {
 
   @Get()
   @UseGuards(new AdminGuard())
-  getAllUsers(@GetUser() user: User) {
+  getAllUsers() {
     return this.userService.getAllUsers();
   }
 
@@ -43,9 +45,10 @@ export class UserController {
     return this.userService.editUser(id, dto);
   }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   @UseGuards(new AdminGuard())
   deleteUser(@Param('id') id: number) {
-    return this.userService.deleteUser(id);
+    return this.userService.deleteUser(+id);
   }
 }

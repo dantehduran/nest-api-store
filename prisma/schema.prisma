@@ -19,6 +19,8 @@ model User {
   fullName   String?
   lastActive DateTime?
 
+  records Record[]
+
   @@map("users")
 }
 
@@ -32,6 +34,7 @@ model Product {
   price       Decimal?   @default("0")
   stock       Int        @default(0)
   categories  Category[]
+  records     Record[]
 
   @@map("products")
 }
@@ -42,4 +45,18 @@ model Category {
   products Product[]
 
   @@map("categories")
+}
+
+model Record {
+  id        Int      @id @default(autoincrement())
+  type      String
+  amount    Int
+  createdAt DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  @@map("records")
 }

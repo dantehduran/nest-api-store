@@ -7,6 +7,7 @@ import { AuthDto } from '../src/auth/dto';
 import { EditDto } from '../src/user/dto';
 import { CreateProductDto, EditProductDto } from 'src/product/dto';
 import { CreateCategoryDto } from 'src/category/dto';
+import { CreateRecordDto } from 'src/record/dto';
 describe('App e2e test', () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -26,9 +27,9 @@ describe('App e2e test', () => {
     app.close();
   });
   describe('Auth', () => {
-    const dto: AuthDto = { email: 'test@test.com', password: 'test' };
+    const dto: AuthDto = { username: 'admin', password: '123456' };
     describe('Signup', () => {
-      it('should throw if email is empty', () => {
+      it('should throw if username is empty', () => {
         return pactum
           .spec()
           .post('/auth/signup')
@@ -39,7 +40,7 @@ describe('App e2e test', () => {
         return pactum
           .spec()
           .post('/auth/signup')
-          .withBody({ email: dto.email })
+          .withBody({ username: dto.username })
           .expectStatus(400);
       });
       it('should throw if no body provided', () => {
@@ -54,7 +55,7 @@ describe('App e2e test', () => {
       });
     });
     describe('Signin', () => {
-      it('should throw if email is empty', () => {
+      it('should throw if username is empty', () => {
         return pactum
           .spec()
           .post('/auth/signin')
@@ -65,7 +66,7 @@ describe('App e2e test', () => {
         return pactum
           .spec()
           .post('/auth/signin')
-          .withBody({ email: dto.email })
+          .withBody({ username: dto.username })
           .expectStatus(400);
       });
       it('should throw if no body provided', () => {
@@ -78,33 +79,6 @@ describe('App e2e test', () => {
           .withBody(dto)
           .expectStatus(200)
           .stores('userAccessToken', 'access_token');
-      });
-    });
-  });
-  describe('User', () => {
-    describe('Get me', () => {
-      it('should get current user', () => {
-        return pactum
-          .spec()
-          .get('/users/me')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .expectStatus(200);
-      });
-    });
-    describe('Edit user by id', () => {
-      it('should edit user', () => {
-        const dto: EditDto = {
-          firstName: 'test edited',
-          email: 'testedited@test.com',
-        };
-        return pactum
-          .spec()
-          .patch('/users')
-          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
-          .withBody(dto)
-          .expectStatus(200)
-          .expectBodyContains(dto.firstName)
-          .expectBodyContains(dto.email);
       });
     });
   });
@@ -195,8 +169,7 @@ describe('App e2e test', () => {
           .expectStatus(201)
           .expectBodyContains(dto.name)
           .expectBodyContains(dto.price)
-          .stores('productId', 'id')
-          .inspect();
+          .stores('productId', 'id');
       });
     });
     describe('Get products', () => {
@@ -296,6 +269,102 @@ describe('App e2e test', () => {
           .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
           .expectStatus(200)
           .expectJsonLength(1); //was created a product without category
+      });
+    });
+  });
+  describe('Records', () => {
+    describe('Get empty records', () => {
+      it('should get empty records', () => {
+        return pactum
+          .spec()
+          .get('/records')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectBody([]);
+      });
+    });
+    describe('Create record', () => {
+      const dto = {
+        type: 'INCREMENT',
+        amount: 100,
+      };
+      const dtoDecrement = {
+        type: 'DECREMENT',
+        amount: 50,
+      };
+      it('get current user', () => {
+        return pactum
+          .spec()
+          .get('/users/me')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .stores('userId', 'id');
+      });
+      it('should create increment record', () => {
+        return pactum
+          .spec()
+          .post('/records')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .withBody({
+            ...dto,
+            userId: '$S{userId}',
+            productId: '$S{productId2}',
+          })
+          .expectStatus(201)
+          .expectBodyContains(dto.type)
+          .expectBodyContains(dto.amount)
+          .expectJsonLike({
+            amount: dto.amount,
+            type: dto.type,
+          })
+          .stores('recordId', 'id');
+      });
+      it('should create decrement record', () => {
+        return pactum
+          .spec()
+          .post('/records')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .withBody({
+            ...dtoDecrement,
+            userId: '$S{userId}',
+            productId: '$S{productId2}',
+          })
+          .expectStatus(201)
+          .expectBodyContains(dtoDecrement.type)
+          .expectBodyContains(dtoDecrement.amount)
+          .expectJsonLike({
+            amount: dto.amount - dtoDecrement.amount,
+            type: dtoDecrement.type,
+          })
+          .stores('recordId2', 'id');
+      });
+    });
+    describe('Get  records', () => {
+      it('should get records', () => {
+        return pactum
+          .spec()
+          .get('/records')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectJsonLength(2);
+      });
+    });
+    describe('Delete record by id', () => {
+      it('should delete record by id', () => {
+        return pactum
+          .spec()
+          .delete('/records/{id}')
+          .withPathParams('id', '$S{recordId}')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(204);
+      });
+      it('should get one record', () => {
+        return pactum
+          .spec()
+          .get('/records')
+          .withHeaders({ Authorization: 'Bearer $S{userAccessToken}' })
+          .expectStatus(200)
+          .expectJsonLength(1);
       });
     });
   });
