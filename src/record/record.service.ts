@@ -27,13 +27,22 @@ export class RecordService {
     return record;
   }
 
-  findAll() {
-    return this.prisma.record.findMany({
+  async findAll(currentPage: number, limit: number) {
+    const totalCount = await this.prisma.record.count();
+    const data = await this.prisma.record.findMany({
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
       include: {
         user: { select: { id: true, username: true } },
         product: { select: { id: true, name: true } },
       },
     });
+    return { totalCount, rows: data };
   }
 
   async remove(id: number) {

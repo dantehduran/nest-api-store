@@ -12,8 +12,13 @@ export class CategoryService {
     });
   }
 
-  findAll() {
-    return this.prisma.category.findMany();
+  async findAll(currentPage: number, limit: number = 10) {
+    const totalCount = await this.prisma.category.count();
+    const data = await this.prisma.category.findMany({
+      skip: (currentPage - 1) * limit,
+      take: limit,
+    });
+    return { totalCount, rows: data };
   }
 
   findOne(id: number) {

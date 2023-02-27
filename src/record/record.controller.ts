@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { RecordService } from './record.service';
 import { CreateRecordDto } from './dto/create-record.dto';
@@ -28,8 +29,11 @@ export class RecordController {
   }
 
   @Get()
-  findAll() {
-    return this.recordService.findAll();
+  findAll(
+    @Query('currentPage') currentPage: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.recordService.findAll(+currentPage, +limit);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)

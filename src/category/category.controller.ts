@@ -9,6 +9,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminGuard } from '../common/guards';
@@ -28,8 +29,11 @@ export class CategoryController {
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(
+    @Query('currentPage') currentPage: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.categoryService.findAll(+currentPage, +limit);
   }
 
   @Get(':id')

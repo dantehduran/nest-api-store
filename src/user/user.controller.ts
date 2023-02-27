@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -29,8 +30,11 @@ export class UserController {
 
   @Get()
   @UseGuards(new AdminGuard())
-  getAllUsers() {
-    return this.userService.getAllUsers();
+  getAllUsers(
+    @Query('currentPage') currentPage: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.userService.getAllUsers(+currentPage, +limit);
   }
 
   @Post()

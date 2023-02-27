@@ -5,8 +5,19 @@ import { CreateProductDto, EditProductDto } from './dto';
 @Injectable()
 export class ProductService {
   constructor(private prisma: PrismaService) {}
-  getProducts() {
-    return this.prisma.product.findMany({ include: { categories: true } });
+  async getProducts(currentPage: number, limit: number = 10) {
+    const totalCount = await this.prisma.product.count();
+    const data = await this.prisma.product.findMany({
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
+      include: { categories: true },
+    });
+    return { totalCount, rows: data };
   }
 
   getProduct(id: number) {

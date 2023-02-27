@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,8 +21,11 @@ import { ProductService } from './product.service';
 export class ProductController {
   constructor(private productService: ProductService) {}
   @Get()
-  getProducts() {
-    return this.productService.getProducts();
+  getProducts(
+    @Query('currentPage') currentPage: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.productService.getProducts(+currentPage, +limit);
   }
 
   @Get(':id')

@@ -33,8 +33,16 @@ export class UserService {
     delete user.hash;
     return user;
   }
-  async getAllUsers() {
+  async getAllUsers(currentPage: number, limit: number = 10) {
+    const totalCount = await this.prisma.user.count();
     const users = await this.prisma.user.findMany({
+      skip: (currentPage - 1) * limit,
+      take: limit,
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
       select: {
         id: true,
         username: true,
@@ -42,7 +50,7 @@ export class UserService {
         createdAt: true,
       },
     });
-    return users;
+    return { rows: users, totalCount };
   }
   async deleteUser(userId: number) {
     const user = await this.prisma.user.delete({
