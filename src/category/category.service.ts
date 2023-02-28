@@ -12,11 +12,14 @@ export class CategoryService {
     });
   }
 
-  async findAll(currentPage: number, limit: number = 10) {
+  async findAll(currentPage?: number, limit?: number) {
     const totalCount = await this.prisma.category.count();
+    const rows =
+      currentPage && limit
+        ? { take: limit, skip: (currentPage - 1) * limit }
+        : null;
     const data = await this.prisma.category.findMany({
-      skip: (currentPage - 1) * limit,
-      take: limit,
+      ...rows,
     });
     return { totalCount, rows: data };
   }

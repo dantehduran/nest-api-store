@@ -5,11 +5,14 @@ import { CreateProductDto, EditProductDto } from './dto';
 @Injectable()
 export class ProductService {
   constructor(private prisma: PrismaService) {}
-  async getProducts(currentPage: number, limit: number = 10) {
+  async getProducts(currentPage?: number, limit?: number) {
+    const rows =
+      currentPage && limit
+        ? { take: limit, skip: (currentPage - 1) * limit }
+        : null;
     const totalCount = await this.prisma.product.count();
     const data = await this.prisma.product.findMany({
-      skip: (currentPage - 1) * limit,
-      take: limit,
+      ...rows,
       orderBy: [
         {
           createdAt: 'desc',
